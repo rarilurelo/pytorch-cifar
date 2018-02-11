@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
+import torch.backends.cudnn as cudnn
 import torchvision
 import torchvision.transforms as transforms
 
@@ -34,7 +35,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, n
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 net = torch.load(args.net)
-fisher = Variable(torch.load(args.fisher))
+fisher = Variable(torch.load(args.fisher).cuda(args.cuda_device_number))
 
 if use_cuda:
     net.cuda(args.cuda_device_number)

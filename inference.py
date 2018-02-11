@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
+import torch.backends.cudnn as cudnn
 import torchvision
 import torchvision.transforms as transforms
 
@@ -34,7 +35,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=False, n
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 net = torch.load(args.net)
-fisher = Variable(torch.load(args.fisher))
+fisher = Variable(torch.load(args.fisher).cuda(args.cuda_device_number))
 
 if use_cuda:
     net.cuda(args.cuda_device_number)
@@ -49,14 +50,14 @@ for batch_idx, (inputs, targets) in enumerate(testloader):
     if use_cuda:
         inputs, targets = inputs.cuda(args.cuda_device_number), targets.cuda(args.cuda_device_number)
     inputs, targets = Variable(inputs, volatile=True), Variable(targets)
-    result = dict(input=inputs[0].data.cpu().numpy(), output=classes[targets[0].data.cpu().numpy()])
+    result = dict(input=inputs[0].data.cpu().numpy(), output=classes[targets[0].data.cpu().numpy()[0]])
     inf_seq = []
     for i in range(100):
         sampled_param = dist_post.sample()
-        nn.utils.vector_to_parameters(sampled_param, nn.parameters())
+        nn.utils.vector_to_parameters(sampled_param, net.parameters())
         outputs = net(inputs)
         _, predicted = torch.max(outputs.data, 1)
-        inf_seq.append(predicted.data[0])
+        inf_seq.append(predicted[0])
     result['inference'] = inf_seq
     saves.append(result)
 joblib.dump(saves, 'saves.pkl')

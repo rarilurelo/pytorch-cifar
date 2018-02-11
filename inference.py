@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Caluculate Fisher'
 parser.add_argument('--net', type=str, help='net path', required=True)
 parser.add_argument('--fisher', type=str, help='fim path', required=True)
 parser.add_argument('--cuda_device_number', type=int, default=0)
+parser.add_argument('--mag', type=float, default=1)
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -42,7 +43,7 @@ if use_cuda:
     cudnn.benchmark = True
 
 theta_star = nn.utils.parameters_to_vector([p.contiguous() for p in net.parameters()])
-dist_post = Normal(theta_star, 1 / (fisher + 1e-8))
+dist_post = Normal(theta_star, 1 / (fisher + 1e-8)*args.mag)
 
 net.eval()
 saves = []
@@ -60,4 +61,4 @@ for batch_idx, (inputs, targets) in enumerate(testloader):
         inf_seq.append(predicted[0])
     result['inference'] = inf_seq
     saves.append(result)
-joblib.dump(saves, 'saves.pkl')
+joblib.dump(saves, "saves_mag{}.pkl".format(args.mag))

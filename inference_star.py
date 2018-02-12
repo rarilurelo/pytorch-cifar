@@ -41,7 +41,7 @@ if use_cuda:
     net.cuda(args.cuda_device_number)
     cudnn.benchmark = True
 
-#theta_star = nn.utils.parameters_to_vector([p.contiguous() for p in net.parameters()])
+theta_star = nn.utils.parameters_to_vector([p.contiguous() for p in net.parameters()])
 #dist_post = Normal(theta_star, 1 / (fisher + 1e-8))
 
 net.eval()
@@ -55,6 +55,7 @@ for batch_idx, (inputs, targets) in enumerate(testloader):
     #for i in range(100):
     #    sampled_param = dist_post.sample()
     #    nn.utils.vector_to_parameters(sampled_param, nn.parameters())
+    nn.utils.vector_to_parameters(theta_star, net.parameters())
     outputs = net(inputs)
     _, predicted = torch.max(outputs.data, 1)
     result['inference'] = predicted[0]

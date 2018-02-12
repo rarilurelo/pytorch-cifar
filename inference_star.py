@@ -50,14 +50,14 @@ for batch_idx, (inputs, targets) in enumerate(testloader):
     if use_cuda:
         inputs, targets = inputs.cuda(args.cuda_device_number), targets.cuda(args.cuda_device_number)
     inputs, targets = Variable(inputs, volatile=True), Variable(targets)
-    result = dict(input=inputs[0].data.cpu().numpy(), output=classes[targets[0].data.cpu().numpy()])
+    result = dict(input=inputs[0].data.cpu().numpy(), output=classes[targets[0].data.cpu().numpy()[0]])
     #inf_seq = []
     #for i in range(100):
     #    sampled_param = dist_post.sample()
     #    nn.utils.vector_to_parameters(sampled_param, nn.parameters())
     outputs = net(inputs)
     _, predicted = torch.max(outputs.data, 1)
-    result['inference'] = predicted.data[0]
+    result['inference'] = predicted[0]
     saves.append(result)
 joblib.dump(saves, 'saves_star.pkl')
 

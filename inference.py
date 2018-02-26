@@ -43,7 +43,7 @@ if use_cuda:
     cudnn.benchmark = True
 
 theta_star = nn.utils.parameters_to_vector([p.contiguous() for p in net.parameters()])
-dist_post = Normal(theta_star, 1 / (fisher + 1e-8)*args.mag)
+dist_post = Normal(theta_star, torch.sqrt(1 / (fisher + 1e-8))*args.mag)
 
 net.eval()
 saves = []
